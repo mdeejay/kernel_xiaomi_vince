@@ -399,7 +399,7 @@ struct qpnp_hap {
 	bool correct_lra_drive_freq;
 	bool misc_trim_error_rc19p2_clk_reg_present;
 	bool perform_lra_auto_resonance_search;
-	int td_value;
+	int  td_value;
 };
 
 static struct qpnp_hap *ghap;
