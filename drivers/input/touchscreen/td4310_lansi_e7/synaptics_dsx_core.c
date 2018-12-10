@@ -41,7 +41,8 @@
 #include <linux/gpio.h>
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
-#include <linux/input/synaptics_dsx.h>
+
+#include <synaptics_dsx.h>
 #include "synaptics_dsx_core.h"
 #include <linux/delay.h>
 #include <linux/hqsysfs.h>
@@ -125,23 +126,24 @@
 #define F12_WAKEUP_GESTURE_MODE 0x02
 #define F12_UDG_DETECT 0x0f
 
+
 static struct synaptics_rmi4_data *rmi4_data;
 
-bool synaptics_gesture_func_on = true;
+bool synaptics_gesture_func_on_lansi = true;
 #if WAKEUP_GESTURE
 #define WAKEUP_OFF 4
 #define WAKEUP_ON 5
 
-int synaptics_gesture_switch (struct input_dev *dev, unsigned int type, unsigned int code, int value)
+int synaptics_gesture_switch_lansi (struct input_dev *dev, unsigned int type, unsigned int code, int value)
 {
 
 	unsigned int input ;
 	if (type == EV_SYN && code == SYN_CONFIG) {
 		if (value == WAKEUP_OFF) {
-			synaptics_gesture_func_on = false;
+			synaptics_gesture_func_on_lansi = false;
 			input = 0;
 		} else if (value == WAKEUP_ON) {
-			synaptics_gesture_func_on  = true;
+			synaptics_gesture_func_on_lansi  = true;
 			input = 1;
 		}
 	}
@@ -153,7 +155,7 @@ int synaptics_gesture_switch (struct input_dev *dev, unsigned int type, unsigned
 #endif
 
 
-extern int get_tddi_lockdown_data (unsigned char *lockdown_data, unsigned short leng);
+extern int get_tddi_lockdown_data_lansi (unsigned char *lockdown_data, unsigned short leng);
 
 static int synaptics_rmi4_check_status (struct synaptics_rmi4_data *rmi4_data,
 		bool *was_in_bl_mode);
@@ -937,7 +939,7 @@ static ssize_t synaptics_rmi4_wake_gesture_store (struct device *dev,
 	if (sscanf (buf, "%u", &input) != 1)
 		return -EINVAL;
 
-	if (synaptics_gesture_func_on)
+	if (synaptics_gesture_func_on_lansi)
 		input = input > 0 ? 1 : 0;
 	   else
 		input = 0;
@@ -4144,7 +4146,7 @@ static void synaptics_rmi4_exp_fn_work (struct work_struct *work)
 	return;
 }
 
-void synaptics_rmi4_new_function (struct synaptics_rmi4_exp_fn *exp_fn,
+void synaptics_rmi4_new_function_lansi (struct synaptics_rmi4_exp_fn *exp_fn,
 		bool insert)
 {
 	struct synaptics_rmi4_exp_fhandler *exp_fhandler;
@@ -4188,7 +4190,7 @@ exit:
 
 	return;
 }
-EXPORT_SYMBOL (synaptics_rmi4_new_function);
+EXPORT_SYMBOL (synaptics_rmi4_new_function_lansi);
 
 #ifdef SYNAPTICS_ESD_CHECK
 void synaptics_rmi4_esd_work (struct work_struct *work)
@@ -4449,7 +4451,7 @@ static int synaptics_rmi4_probe (struct platform_device *pdev)
 #if WAKEUP_GESTURE
     input_set_capability (rmi4_data->input_dev, EV_KEY, KEY_WAKEUP);
 
-   rmi4_data->input_dev->event = synaptics_gesture_switch;
+   rmi4_data->input_dev->event = synaptics_gesture_switch_lansi;
 #endif
 
 
@@ -4736,7 +4738,7 @@ static int synaptics_rmi4_suspend (struct device *dev)
 	if (rmi4_data->stay_awake)
 		return 0;
 	printk ("[synaptics]Enter %s\n", __func__);
-	printk ("yinchenyang TP suspend begin\n");
+
 #ifdef SYNAPTICS_ESD_CHECK
 	cancel_delayed_work_sync (&(rmi4_data->esd_work));
 #endif
@@ -4792,8 +4794,6 @@ exit:
 
 	rmi4_data->suspend = true;
 
-	printk ("yinchenyang TP suspend finish\n");
-
 	return 0;
 }
 
@@ -4806,6 +4806,7 @@ static int synaptics_rmi4_resume (struct device *dev)
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata (dev);
 
 	printk ("TP-time TP resume begin\n");
+
 	if (rmi4_data->stay_awake)
 		return 0;
 
@@ -4827,7 +4828,7 @@ static int synaptics_rmi4_resume (struct device *dev)
 
 
 
-exit :
+exit:
 #ifdef FB_READY_RESET
 	retval = synaptics_rmi4_reset_device (rmi4_data, false);
 	if (retval < 0) {
@@ -4875,7 +4876,7 @@ static int __init synaptics_rmi4_init (void)
 {
 	int retval;
 
-	retval = synaptics_rmi4_bus_init ();
+	retval = synaptics_rmi4_bus_init_lansi ();
 	if (retval)
 		return retval;
 
@@ -4886,7 +4887,7 @@ static void __exit synaptics_rmi4_exit (void)
 {
 	platform_driver_unregister (&synaptics_rmi4_driver);
 
-	synaptics_rmi4_bus_exit ();
+	synaptics_rmi4_bus_exit_lansi ();
 
 	return;
 }

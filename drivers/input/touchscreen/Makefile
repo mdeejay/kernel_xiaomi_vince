@@ -85,4 +85,6 @@ obj-$(CONFIG_TOUCHSCREEN_W90X900)	+= w90p910_ts.o
 obj-$(CONFIG_TOUCHSCREEN_TPS6507X)	+= tps6507x-ts.o
 obj-$(CONFIG_TOUCHSCREEN_ZFORCE)	+= zforce_ts.o
 obj-$(CONFIG_TOUCHSCREEN_TD4310_E7)       += td4310_e7/
+obj-$(CONFIG_TOUCHSCREEN_TD4310_LANSI_E7)       += td4310_lansi_e7/
+obj-$(CONFIG_TOUCHSCREEN_NT36672)       += nt36672/
 obj-$(CONFIG_VITURALSAR)		+= vituralsar_driver.o
